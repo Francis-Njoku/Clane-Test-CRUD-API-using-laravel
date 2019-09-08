@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\NewPost;
 use App\User;
 
 class Post extends JsonResource
@@ -33,9 +32,9 @@ class Post extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @param  \Illuminate\Http\Response  $response
      * @return void
-     */
+     *
     public function withResponse($request, $response)
     {
         $response->header('X-Value', 'True');
-    }
+    } */
 }

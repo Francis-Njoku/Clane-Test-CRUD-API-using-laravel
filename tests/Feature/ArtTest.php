@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\User;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
-use App\Post;
+use App\Article;
+use Faker\Generator as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ArtTest extends TestCase
@@ -27,42 +29,37 @@ class ArtTest extends TestCase
     public function only_authors_can_post()
     {
        $this->actingAs(factory(User::class)->create());
-        $response = $this->get('/article')
+        $response = $this->get('/article/create')
             ->assertOk();
     }
+
     /**
-     * Test the read resource route.
+     * Test User Post
      */
-    public function testRead()
-    {
-        $post = $this->actingAs(factory(User::class)->create());
-        $expected = $this->serialize($post);
-        $this->doRead($post)->assertRead($expected);
-    }
-    /**
-     * Test the search route
-     */
-    public function testSearch()
-    {
-        // ensure there is at least one model in the database
-        $this->actingAs(factory(User::class)->create());
-        $this->doSearch([
-            'page' => ['number' => 1, 'size' => 10],
-        ])->assertSearchedMany();
-    }
 
     /** @test */
-    public function testBasicExample()
+    public function a_user_cannot_post_without_authentication()
     {
-        $this->actingAs(factory(User::class)->create());
-        $this->actingAs(factory(Post::class)->create());
-        $response = $this->json('POST', '/article');
+        $response = $this->json('POST', '/article', ['title' => 'Sally']);
 
         $response
             ->assertStatus(200)
             ->assertJson([
-                'status_code' => true,
+                'status_code' => 401,
             ]);
+    }
+
+    /** @test */
+    public function test_that_only_authorized_users_can_manage_a_post()
+    {
+        // $this->withoutExceptionHandling();
+        $user = factory(User::class)->create();
+
+        // Guests
+        //$this->get('/article/create')->assertRedirect('login');
+
+        // Users
+        $this->actingAs($user)->get('/article/create')->assertStatus(200);
     }
 
     /** @test */
@@ -78,6 +75,7 @@ class ArtTest extends TestCase
             'author' => '9'
         ]);
 
-        $this->assertCount(1, Post::all());
+        $this->assertCount(1, Article::all());
     }
+
 }
